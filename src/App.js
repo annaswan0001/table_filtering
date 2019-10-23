@@ -80,6 +80,14 @@ class App extends React.Component {
                 item.lastName.toLowerCase().includes(search.toLowerCase()) ||
                 item.email.toLowerCase().includes(search.toLowerCase()) ||
                 item.id.toString().includes(search)
+
+
+                   // (item.firstName
+                //     .toLowerCase()
+                //     .indexOf(search.toLowerCase()) >=0) ||
+                // (item.lastName.toLowerCase().indexOf(search.toLowerCase()) >=0) ||
+                // (item.email.toLowerCase().indexOf(search.toLowerCase()) >=0) ||
+                // (item.id.toString().indexOf(search)>=0)
             );
         });
         if (!result) {
