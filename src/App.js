@@ -5,7 +5,7 @@ import DetaiRowView from "./DetailRowView";
 import _ from "lodash";
 import "./index.css";
 import ModeSelector from "./ModeSelector";
-import ReactPaginate from 'react-paginate'; 
+import ReactPaginate from "react-paginate";
 
 class App extends React.Component {
     state = {
@@ -14,7 +14,8 @@ class App extends React.Component {
         data: [],
         sort: "asc",
         sortField: "id",
-        row: ""
+        row: "",
+        currentPage: 0,
     };
 
     onSort = sortField => {
@@ -57,11 +58,17 @@ class App extends React.Component {
         }
     }
 
+    pageChangeHandler = ({selected}) => (
+      this.setState({currentPage: selected})
+    )
+
     render() {
-        const { row, loader, data } = this.state;
+        const { row, loader, data, isModeSelected } = this.state;
+        const pageSize= 10
+        const displayData = _.chunk(data, pageSize)[this.state.currentPage]
         return (
             <div className="container">
-                {!this.state.isModeSelected ? (
+                {!isModeSelected ? (
                     <ModeSelector onSelect={this.onSelect} />
                 ) : loader ? (
                     <Loader />
@@ -70,14 +77,34 @@ class App extends React.Component {
                         <ModeSelector onSelect={this.onSelect} />
                         <Table
                             onSort={this.onSort}
-                            data={data}
+                            data={displayData}
                             sort={this.state.sort}
                             sortField={this.state.sortField}
                             onRowSelect={this.onRowSelect}
                         />
+                        <DetaiRowView person={row} />
+
+                        {data.length > pageSize ?
+                        <ReactPaginate
+                            previousLabel={"<"}
+                            nextLabel={">"}
+                            breakLabel={"..."}
+                            breakClassName={"break-me"}
+                            pageCount={data.length/pageSize}
+                            marginPagesDisplayed={3}
+                            pageRangeDisplayed={3}
+                            onPageChange={this.pageChangeHandler}
+                            containerClassName={"pagination"}
+                            activeClassName={"active"}
+                            pageClassName="page-item"
+                            pageLinkClassName="page-link"
+                            previousClassName="page-item"
+                            nextClassName="page-item"
+                            previousLinkClassName="page-link"
+                            nextLinkClassName="page-link"
+                        /> : ""}
                     </React.Fragment>
                 )}
-                <DetaiRowView person={row} />
             </div>
         );
     }

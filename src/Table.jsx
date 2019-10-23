@@ -46,7 +46,7 @@ export default props => (
       </tr>
     </thead>
     <tbody>
-      {props.data.map(item => (
+      {props.data.map.length>0 && props.data.map(item => (
         <tr onClick={()=>{props.onRowSelect(item)}} key={item.id + item.phone}>
           <td
             onClick={() => {
