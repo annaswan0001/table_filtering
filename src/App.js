@@ -1,6 +1,7 @@
 import React from "react";
 import Loader from "./Loader";
 import Table from "./Table";
+import TableSearch from './TableSearch'
 import DetaiRowView from "./DetailRowView";
 import _ from "lodash";
 import "./index.css";
@@ -16,6 +17,8 @@ class App extends React.Component {
         sortField: "id",
         row: "",
         currentPage: 0,
+      
+        
     };
 
     onSort = sortField => {
@@ -58,14 +61,53 @@ class App extends React.Component {
         }
     }
 
-    pageChangeHandler = ({selected}) => (
-      this.setState({currentPage: selected})
-    )
+    pageChangeHandler = ({ selected }) =>
+        this.setState({ currentPage: selected });
+
+        
+    getFilteredData() {
+        const { data, search } = this.state;
+        console.log(data)
+
+        if (!search) {
+            return data;
+        }
+        let result = data.filter(item => {
+            return (
+                item.firstName
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                item.lastName.toLowerCase().includes(search.toLowerCase()) ||
+                item.email.toLowerCase().includes(search.toLowerCase()) ||
+                item.id.toString().includes(search)
+            );
+        });
+        if (!result) {
+            result = [];
+        }
+
+        return result;
+    }
+
+    onInputChange = e => {
+        this.setState({ inputValue: e.target.value });
+    };
+
+    searchHandler = search => {
+        this.setState({search, currentPage: 0})
+      }
 
     render() {
-        const { row, loader, data, isModeSelected } = this.state;
-        const pageSize= 10
-        const displayData = _.chunk(data, pageSize)[this.state.currentPage]
+        const { row, inputValue, loader, data, isModeSelected } = this.state;
+        const filteredData = this.getFilteredData();
+        const pageSize = 10;
+        const pageCount = Math.ceil(filteredData.length / pageSize);
+        const displayData = _.chunk(filteredData, pageSize)[
+            this.state.currentPage
+        ]
+            ? _.chunk(filteredData, pageSize)[this.state.currentPage]
+            : [];
+
         return (
             <div className="container">
                 {!isModeSelected ? (
@@ -75,6 +117,8 @@ class App extends React.Component {
                 ) : (
                     <React.Fragment>
                         <ModeSelector onSelect={this.onSelect} />
+                        <TableSearch onSearch={this.searchHandler}/>
+
                         <Table
                             onSort={this.onSort}
                             data={displayData}
@@ -84,25 +128,28 @@ class App extends React.Component {
                         />
                         <DetaiRowView person={row} />
 
-                        {data.length > pageSize ?
-                        <ReactPaginate
-                            previousLabel={"<"}
-                            nextLabel={">"}
-                            breakLabel={"..."}
-                            breakClassName={"break-me"}
-                            pageCount={data.length/pageSize}
-                            marginPagesDisplayed={3}
-                            pageRangeDisplayed={3}
-                            onPageChange={this.pageChangeHandler}
-                            containerClassName={"pagination"}
-                            activeClassName={"active"}
-                            pageClassName="page-item"
-                            pageLinkClassName="page-link"
-                            previousClassName="page-item"
-                            nextClassName="page-item"
-                            previousLinkClassName="page-link"
-                            nextLinkClassName="page-link"
-                        /> : ""}
+                        {data.length > pageSize ? (
+                            <ReactPaginate
+                                previousLabel={"<"}
+                                nextLabel={">"}
+                                breakLabel={"..."}
+                                breakClassName={"break-me"}
+                                pageCount={pageCount}
+                                marginPagesDisplayed={3}
+                                pageRangeDisplayed={3}
+                                onPageChange={this.pageChangeHandler}
+                                containerClassName={"pagination"}
+                                activeClassName={"active"}
+                                pageClassName="page-item"
+                                pageLinkClassName="page-link"
+                                previousClassName="page-item"
+                                nextClassName="page-item"
+                                previousLinkClassName="page-link"
+                                nextLinkClassName="page-link"
+                            />
+                        ) : (
+                            ""
+                        )}
                     </React.Fragment>
                 )}
             </div>
